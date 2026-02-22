@@ -1,0 +1,30 @@
+name: Expo Auto-Update
+on:
+  push:
+    branches:
+      - main
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Stažení kódu
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Nastavení Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: 🚀 Nastavení Expa
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: 📦 Instalace balíčků
+        run: npm install
+
+      - name: 🔄 Odeslání aktualizace do Expa
+        run: npx expo publish
+        
