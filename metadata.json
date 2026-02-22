@@ -1,0 +1,7 @@
+{
+  "name": "Synthesis Intelligence",
+  "description": "Empatický průvodce a analytický nástroj pro rodiče dětí na autistickém spektru od Studia Synthesis.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
