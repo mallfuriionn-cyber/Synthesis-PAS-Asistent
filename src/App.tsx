@@ -218,9 +218,11 @@ const DiaryScreen = () => {
 const SosScreen = () => {
   const [advice, setAdvice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showBreathing, setShowBreathing] = useState(true);
 
   const triggerSos = async () => {
     setLoading(true);
+    setShowBreathing(false);
     try {
       const res = await getCrisisAdvice("Meltdown v obchodě, hluk, přetížení.");
       setAdvice(res || null);
@@ -241,60 +243,87 @@ const SosScreen = () => {
         <p className="text-slate-600 italic">Okamžitá podpora v krizi</p>
       </header>
 
-      {!advice ? (
-        <div className="space-y-8">
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-[40px] shadow-sm border border-brand-sos text-center">
-            <p className="text-slate-700 mb-8 leading-relaxed">
-              Cítíte, že situace eskaluje? Klikněte na tlačítko níže pro okamžitý krizový protokol SI.
+      <AnimatePresence mode="wait">
+        {showBreathing && !advice && (
+          <motion.div
+            key="breathing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center py-12"
+          >
+            <h2 className="text-2xl font-serif text-brand-sos-text mb-12">Dýchej pomalu...</h2>
+            
+            <div className="relative flex items-center justify-center">
+              <motion.div
+                animate={{
+                  scale: [1, 1.6, 1],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="w-32 h-32 rounded-full bg-brand-sos-text/10 border-4 border-brand-sos-text"
+              />
+              <div className="absolute text-brand-sos-text font-serif italic text-sm">
+                Soustřeď se
+              </div>
+            </div>
+
+            <p className="mt-16 text-slate-500 text-center max-w-[200px]">
+              Sleduj kruh a sjednoť svůj dech s jeho pohybem.
             </p>
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={triggerSos}
               disabled={loading}
-              className="w-full bg-brand-sos-text text-white py-6 rounded-3xl font-bold text-xl shadow-xl shadow-red-200 flex items-center justify-center gap-3"
+              className="mt-12 w-full max-w-xs bg-brand-sos-text text-white py-6 rounded-3xl font-bold text-xl shadow-xl shadow-red-200 flex items-center justify-center gap-3"
             >
               {loading ? 'Načítám protokol...' : 'AKTIVOVAT POMOC'}
             </motion.button>
-          </div>
+          </motion.div>
+        )}
 
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold">1</div>
-              <p className="text-sm text-slate-600 font-medium">Zajistěte bezpečí dítěte i okolí.</p>
+        {advice && (
+          <motion.div 
+            key="advice"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white p-8 rounded-[40px] shadow-2xl border-2 border-brand-sos"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-serif text-2xl font-bold text-brand-sos-text">SI Krizový Protokol</h2>
+              <button onClick={() => { setAdvice(null); setShowBreathing(true); }} className="text-slate-300 hover:text-slate-500">
+                <X size={24} />
+              </button>
             </div>
-            <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold">2</div>
-              <p className="text-sm text-slate-600 font-medium">Omezte senzorické podněty (světlo, hluk).</p>
+            <div className="prose prose-red max-w-none">
+              <Markdown>{advice}</Markdown>
             </div>
-            <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl">
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold">3</div>
-              <p className="text-sm text-slate-600 font-medium">Zůstaňte v klidu, mluvte minimálně.</p>
-            </div>
+            <button 
+              onClick={() => { setAdvice(null); setShowBreathing(true); }}
+              className="mt-8 w-full border-2 border-brand-sos text-brand-sos-text py-4 rounded-2xl font-bold"
+            >
+              Situace je pod kontrolou
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!advice && showBreathing && (
+        <div className="grid grid-cols-1 gap-4 mt-8">
+          <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl">
+            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold">1</div>
+            <p className="text-sm text-slate-600 font-medium">Zajistěte bezpečí dítěte i okolí.</p>
+          </div>
+          <div className="flex items-start gap-4 p-4 bg-white/50 rounded-2xl">
+            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-xs font-bold">2</div>
+            <p className="text-sm text-slate-600 font-medium">Omezte senzorické podněty (světlo, hluk).</p>
           </div>
         </div>
-      ) : (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white p-8 rounded-[40px] shadow-2xl border-2 border-brand-sos"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="font-serif text-2xl font-bold text-brand-sos-text">SI Krizový Protokol</h2>
-            <button onClick={() => setAdvice(null)} className="text-slate-300 hover:text-slate-500">
-              <X size={24} />
-            </button>
-          </div>
-          <div className="prose prose-red max-w-none">
-            <Markdown>{advice}</Markdown>
-          </div>
-          <button 
-            onClick={() => setAdvice(null)}
-            className="mt-8 w-full border-2 border-brand-sos text-brand-sos-text py-4 rounded-2xl font-bold"
-          >
-            Situace je pod kontrolou
-          </button>
-        </motion.div>
       )}
     </div>
   );
